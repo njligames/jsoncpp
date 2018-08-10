@@ -98,6 +98,42 @@ IF(MSVC)
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
 ENDIF()
 
+
+
+
+
+
+if(MSVC)
+  option(FORCE_STATIC_VCRT "Force /MT for static VC runtimes" ON)
+  if(FORCE_STATIC_VCRT)
+    foreach(flag_var
+        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        )
+      if(${flag_var} MATCHES "/MD")
+        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+      endif()
+      MESSAGE(STATUS "flag_var ${flag_var} ${${flag_var}}")
+    endforeach()
+  endif()
+
+  # Make sure /RTC1 is disabled, otherwise it will use functions from the CRT
+  foreach(flag_var
+      CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
+      )
+    string(REGEX REPLACE "/RTC(su|[1su])" "" ${flag_var} "${${flag_var}}")
+    MESSAGE(STATUS "flag_var ${flag_var} ${${flag_var}}")
+  endforeach(flag_var)
+endif()
+
+
+
+
+
+
+
+
 # Require C++11 support, prefer ISO C++ over GNU variants,
 # as relying solely on ISO C++ is more portable.
 SET(CMAKE_CXX_STANDARD 11)
